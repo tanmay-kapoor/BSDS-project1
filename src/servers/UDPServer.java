@@ -1,0 +1,90 @@
+package servers;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+
+/**
+ * Class that simulates a server for UDP data transmission.
+ * This class' purpose is to receive and process requests that are sent by the client.
+ * This class can read json files to populate a hashmap, perform functions to get, put or delete
+ * key-value pairs and also write the results into a json file to save it for future references.
+ * It simulates a server that uses UDP protocol.
+ */
+public class UDPServer extends AbstractServer {
+  private DatagramSocket serverSocket;
+
+  /**
+   * Constructor to initialize the file name to read json data from, map that stores the previous
+   * and future key-value pairs and the request status as a boolean for each incoming request
+   * which denotes whether a request has been processed or not which in turn helps in displaying
+   * the proper message to the user.
+   *
+   * @param port port to use
+   */
+  public UDPServer(int port) throws IOException {
+    this.serverSocket = new DatagramSocket(port);
+    showInfo("Server started\n");
+  }
+
+  private UDPServer() {
+  }
+
+  @Override
+  protected boolean serveRequests() throws IOException {
+    byte[] receiveData = new byte[1024];
+    byte[] sendData;
+
+    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+    serverSocket.receive(receivePacket);
+
+    String request = new String(receivePacket.getData());
+    showRequest(request);
+
+    // exit program if client says stop
+    if (request.trim().equalsIgnoreCase("stop")) {
+      return true;
+    }
+    String[] req = request.split("\\s+");
+
+    InetAddress ip = receivePacket.getAddress();
+    int clientPort = receivePacket.getPort();
+
+    ValidationCode validationCode = isValidRequest(req);
+    if (validationCode == ValidationCode.VALID_REQUEST_TYPE) {
+      String res = prepareDataToSend(req);
+      sendData = res.getBytes();
+      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, ip, clientPort);
+      serverSocket.send(sendPacket);
+    } else {
+      handleInvalidRequest(validationCode);
+    }
+    return false;
+  }
+
+  @Override
+  protected void closeEverything() {
+    serverSocket.close();
+  }
+
+  @Override
+  protected Server getServerInstance(int port) throws IOException {
+    return new UDPServer(port);
+  }
+
+  /**
+   * Driver method that is the entry point of the program.
+   * This method is executed when we run the program where it validates the cli arguments received
+   * and calls the required methods to proceed further in the program execution.
+   *
+   * @param args String array for command line arguments to be passed when running the program.
+   *             For this program this array should have only one element which is the port number
+   *             for the server.
+   * @throws IllegalArgumentException in case of incorrect number of cli arguments or incorrect
+   *                                  values for name and port number.
+   */
+  public static void main(String[] args) {
+    new UDPServer().validateArgs(args);
+  }
+}
