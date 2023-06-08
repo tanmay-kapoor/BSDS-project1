@@ -50,10 +50,12 @@ java -jar UDPClient.jar <host-name> <port>
 
 Once these two commands have been types, you can start sending request in the format shown above.
 
-### To check the screen shots uploaded as part of this assignment
+### To check the screenshots uploaded as part of this assignment
 
-Do this step if you are in artifacts directory
+Do this step if you are in `artifacts` directory
 
 ```
 cd ../screenshots
 ```
+
+### Please check `Summary.md` in the `out` directory for key learnings.
