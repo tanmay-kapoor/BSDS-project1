@@ -70,8 +70,6 @@ public class UDPClient extends AbstractClient {
    * @param args String array for command line arguments to be passed when running the program.
    *             For this program this array should have exactly 2 elements which are the
    *             name and port number respectively for the client to run on.
-   * @throws IllegalArgumentException in case of incorrect number of cli arguments or incorrect
-   *                                  values for name and port number.
    */
   public static void main(String[] args) {
     new UDPClient().validateArgs(args);

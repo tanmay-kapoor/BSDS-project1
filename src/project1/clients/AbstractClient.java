@@ -28,19 +28,16 @@ abstract class AbstractClient implements Client {
     System.out.println(getTimestamp() + " REQ: " + req);
   }
 
-  // Helper method to print response that the client receives from the server.
   @Override
   public void showResponse(String res) {
     System.out.println(getTimestamp() + " RES received: " + res);
   }
 
-  // Helper method to print any errors during program execution.
   @Override
   public void showError(String msg) {
     System.out.println(getTimestamp() + " ERROR: " + msg);
   }
 
-  // Helper method to print any info to be read by the user
   @Override
   public void showInfo(String msg) {
     System.out.print(msg);
@@ -76,10 +73,6 @@ abstract class AbstractClient implements Client {
     closeEverything();
   }
 
-  // Handles all logic to keep the socket open, make requests to the server, receive responses
-  // from the server and display to the user and also show errors that may occur or in case
-  // the socket times out before receiving a response. Keeps running indefinitely until external
-  // intervention.
   @Override
   public void start() {
     showInfo(

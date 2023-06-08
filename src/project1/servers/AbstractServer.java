@@ -34,7 +34,6 @@ abstract class AbstractServer implements Server {
     this.reqStatus = false;
   }
 
-  // Helper method to read json file and populate the key-value pairs into the map.
   @Override
   public void readFromFile() {
     try {
@@ -55,8 +54,6 @@ abstract class AbstractServer implements Server {
     }
   }
 
-  //  Checks whether request from client is valid or not.
-  //  GET and DELETE request should have only 1 parameter, PUT should have 2.
   @Override
   public ValidationCode isValidRequest(String[] req) {
     req[0] = req[0].toUpperCase();
@@ -80,7 +77,6 @@ abstract class AbstractServer implements Server {
     }
   }
 
-  // Process the request once it has been validated.
   @Override
   public String handleRequest(String[] req) throws IOException {
     reqStatus = true;
@@ -114,7 +110,6 @@ abstract class AbstractServer implements Server {
     }
   }
 
-  // Write contents of hashmap to contents.json file when program has finished executing.
   @Override
   public void writeToFile() throws IOException {
     JSONObject jsonObject = new JSONObject();
@@ -142,25 +137,21 @@ abstract class AbstractServer implements Server {
     return "[" + timestamp + "]";
   }
 
-  // Helper method to print request that the server needs to serve.
   @Override
   public void showRequest(String req) {
     System.out.println(getTimestamp() + " REQ to process: " + req);
   }
 
-  // Helper method to print response that the server will send to the client.
   @Override
   public void showResponse(String res) {
     System.out.println(getTimestamp() + " RES to send: " + res);
   }
 
-  // Helper method to print any errors that happen while the server is running.
   @Override
   public void showError(String msg) {
     System.out.println(getTimestamp() + " ERROR: " + msg);
   }
 
-  // Helper method to print any info to be read by the user
   @Override
   public void showInfo(String msg) {
     System.out.print(msg);
