@@ -30,6 +30,7 @@ public class TCPServer extends AbstractServer {
    * @throws IOException in case of errors which creating the socket.
    */
   public TCPServer(int port) throws IOException {
+    super();
     serverSocket = new ServerSocket(port);
     socket = serverSocket.accept();
     din = new DataInputStream(socket.getInputStream());

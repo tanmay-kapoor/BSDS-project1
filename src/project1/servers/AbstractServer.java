@@ -43,7 +43,6 @@ abstract class AbstractServer implements Server {
     try {
       File f = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
       this.path = f.getParent() + "/";
-      System.out.println(this.path);
     } catch (URISyntaxException e) {
       showError(e.getMessage());
     }
