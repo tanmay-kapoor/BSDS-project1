@@ -13,6 +13,8 @@ import java.net.InetAddress;
  * It simulates a server that uses UDP protocol.
  */
 public class UDPServer extends AbstractServer {
+  private InetAddress ip;
+  private int clientPort;
   private DatagramSocket serverSocket;
 
   /**
@@ -32,35 +34,26 @@ public class UDPServer extends AbstractServer {
   }
 
   @Override
-  protected boolean serveRequests() throws IOException {
-    byte[] receiveData = new byte[1024];
-    byte[] sendData;
+  protected boolean handleServeRequestError(Exception e) {
+    showError(e.getMessage());
+    return false;
+  }
 
+  @Override
+  protected String receiveDataFromClient() throws IOException {
+    byte[] receiveData = new byte[1024];
     DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
     serverSocket.receive(receivePacket);
+    ip = receivePacket.getAddress();
+    clientPort = receivePacket.getPort();
+    return new String(receivePacket.getData()).trim();
+  }
 
-    String request = new String(receivePacket.getData());
-    showRequest(request);
-
-    // exit program if client says stop
-    if (request.trim().equalsIgnoreCase("stop")) {
-      return true;
-    }
-    String[] req = request.split("\\s+");
-
-    InetAddress ip = receivePacket.getAddress();
-    int clientPort = receivePacket.getPort();
-
-    ValidationCode validationCode = isValidRequest(req);
-    if (validationCode == ValidationCode.VALID_REQUEST_TYPE) {
-      String res = prepareDataToSend(req);
-      sendData = res.getBytes();
-      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, ip, clientPort);
-      serverSocket.send(sendPacket);
-    } else {
-      handleInvalidRequest(validationCode);
-    }
-    return false;
+  @Override
+  protected void sendDataToClient(String res) throws IOException {
+    byte[] sendData = res.getBytes();
+    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, ip, clientPort);
+    serverSocket.send(sendPacket);
   }
 
   @Override

@@ -24,26 +24,20 @@ public class TCPServer extends AbstractServer {
   }
 
   @Override
-  protected boolean serveRequests() throws IOException {
-    String request = din.readUTF();
-    showRequest(request);
+  protected boolean handleServeRequestError(Exception e) {
+    showError("Connection lost");
+    return true;
+  }
 
-    // exit program if client says stop
-    if (request.trim().equalsIgnoreCase("stop")) {
-      return true;
-    }
+  @Override
+  protected String receiveDataFromClient() throws IOException {
+    return din.readUTF().trim();
+  }
 
-    String[] req = request.split("\\s+");
-
-    ValidationCode validationCode = isValidRequest(req);
-    if (validationCode == UDPServer.ValidationCode.VALID_REQUEST_TYPE) {
-      String res = prepareDataToSend(req);
-      dout.writeUTF(res);
-      dout.flush();
-    } else {
-      handleInvalidRequest(validationCode);
-    }
-    return false;
+  @Override
+  protected void sendDataToClient(String res) throws IOException {
+    dout.writeUTF(res);
+    dout.flush();
   }
 
   @Override

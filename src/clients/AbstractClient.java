@@ -62,12 +62,11 @@ abstract class AbstractClient implements Client {
     while (true) {
       showInfo("\nREQ to send: ");
       String request = sc.nextLine();
-      if (request.trim().equalsIgnoreCase("stop")) {
-        break;
-      }
-
       try {
         handleRequestsAndResponses(request);
+        if (request.trim().equalsIgnoreCase("stop")) {
+          break;
+        }
       } catch (SocketTimeoutException e) {
         showError(e.getMessage() + ". Check server log or server might be down.");
       } catch (IOException e) {

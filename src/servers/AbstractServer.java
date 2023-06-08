@@ -17,7 +17,11 @@ abstract class AbstractServer implements Server {
   protected final Map<String, String> map;
   protected boolean reqStatus;
 
-  protected abstract boolean serveRequests() throws IOException;
+  protected abstract String receiveDataFromClient() throws IOException;
+
+  protected abstract void sendDataToClient(String res) throws IOException;
+
+  protected abstract boolean handleServeRequestError(Exception e);
 
   protected abstract void closeEverything() throws IOException;
 
@@ -51,49 +55,55 @@ abstract class AbstractServer implements Server {
 
   //  Checks whether request from client is valid or not.
   //  GET and DELETE request should have only 1 parameter, PUT should have 2.
-  protected UDPServer.ValidationCode isValidRequest(String[] req) {
+  protected ValidationCode isValidRequest(String[] req) {
     req[0] = req[0].toUpperCase();
     for (int i = 0; i < req.length; i++) {
       req[i] = req[i].trim();
     }
 
     switch (req[0]) {
+      case "STOP":
+        return req.length == 1 ? ValidationCode.VALID_REQUEST_TYPE : ValidationCode.INCORRECT_PARAMETER_COUNT;
+
       case "GET":
       case "DELETE":
-        return req.length == 2 ? UDPServer.ValidationCode.VALID_REQUEST_TYPE : UDPServer.ValidationCode.INCORRECT_PARAMETER_COUNT;
+        return req.length == 2 ? ValidationCode.VALID_REQUEST_TYPE : ValidationCode.INCORRECT_PARAMETER_COUNT;
 
       case "PUT":
-        return req.length == 3 ? UDPServer.ValidationCode.VALID_REQUEST_TYPE : UDPServer.ValidationCode.INCORRECT_PARAMETER_COUNT;
+        return req.length == 3 ? ValidationCode.VALID_REQUEST_TYPE : ValidationCode.INCORRECT_PARAMETER_COUNT;
 
       default:
-        return UDPServer.ValidationCode.INVALID_REQUEST_TYPE;
+        return ValidationCode.INVALID_REQUEST_TYPE;
     }
   }
 
   // Process the request once it has been validated.
-  protected String handleRequest(String[] req) {
-    reqStatus = false;
+  protected String handleRequest(String[] req) throws IOException {
+    reqStatus = true;
 
     switch (req[0]) {
       case "GET":
         if (map.containsKey(req[1])) {
-          this.reqStatus = true;
           return map.get(req[1]);
         }
+        reqStatus = false;
         return "Invalid request. Can't get key that doesn't exist.";
 
       case "PUT":
         map.put(req[1], req[2]);
-        reqStatus = true;
         return "put successful";
 
       case "DELETE":
         if (map.containsKey(req[1])) {
           map.remove(req[1]);
-          reqStatus = true;
           return "delete successful";
         }
+        reqStatus = false;
         return "Invalid request. Can't delete key that doesnt exist.";
+
+      case "STOP":
+        writeToFile();
+        return "Updated " + fileName + " with latest data.";
 
       default:
         return "never gonna happen";
@@ -137,7 +147,7 @@ abstract class AbstractServer implements Server {
     System.out.print(msg);
   }
 
-  protected String prepareDataToSend(String[] req) {
+  protected String prepareDataToSend(String[] req) throws IOException {
     String res = handleRequest(req);
     if (!reqStatus) {
       long timestamp = System.currentTimeMillis();
@@ -155,7 +165,7 @@ abstract class AbstractServer implements Server {
     if (validationCode == ValidationCode.INCORRECT_PARAMETER_COUNT) {
       res += "incorrect parameter count";
     } else {
-      res += "invalid request type. Must be GET, PUT or DELETE only.";
+      res += "invalid request type. Must be GET, PUT, DELETE or STOP only.";
     }
     showResponse(res);
   }
@@ -169,21 +179,30 @@ abstract class AbstractServer implements Server {
     INCORRECT_PARAMETER_COUNT, INVALID_REQUEST_TYPE, VALID_REQUEST_TYPE
   }
 
-  public void start() throws IOException {
+  public void start() {
     populateMap();
+
     while (true) {
       try {
-        if (serveRequests()) {
-          break;
+        String request = receiveDataFromClient();
+        showRequest(request);
+        String[] req = request.split("\\t+");
+
+        ValidationCode validationCode = isValidRequest(req);
+        if (validationCode == ValidationCode.VALID_REQUEST_TYPE) {
+          String res = prepareDataToSend(req);
+          sendDataToClient(res);
+        } else {
+          handleInvalidRequest(validationCode);
         }
       } catch (IOException e) {
-        showError("Connection lost");
-        break;
+        boolean shouldBreak = handleServeRequestError(e);
+        if (shouldBreak)
+          break;
       }
     }
 
     try {
-      writeToFile();
       closeEverything();
     } catch (IOException e) {
       showError(e.getMessage());
