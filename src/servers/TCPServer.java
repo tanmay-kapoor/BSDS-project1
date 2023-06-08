@@ -17,7 +17,7 @@ public class TCPServer extends AbstractServer {
     socket = serverSocket.accept();
     din = new DataInputStream(socket.getInputStream());
     dout = new DataOutputStream(socket.getOutputStream());
-    showInfo("Server running\n");
+    showInfo("Server running\n\n");
   }
 
   private TCPServer() {

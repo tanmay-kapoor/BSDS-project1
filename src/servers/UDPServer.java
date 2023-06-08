@@ -27,7 +27,7 @@ public class UDPServer extends AbstractServer {
    */
   public UDPServer(int port) throws IOException {
     this.serverSocket = new DatagramSocket(port);
-    showInfo("Server started\n");
+    showInfo("Server started\n\n");
   }
 
   private UDPServer() {

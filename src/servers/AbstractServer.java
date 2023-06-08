@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -127,19 +128,24 @@ abstract class AbstractServer implements Server {
     file.close();
   }
 
+  protected String getTimestamp() {
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    return "[" + timestamp + "]";
+  }
+
   // Helper method to print request that the server needs to serve.
   protected void showRequest(String req) {
-    System.out.println("\nREQ to process: " + req);
+    System.out.println(getTimestamp() + " REQ to process: " + req);
   }
 
   // Helper method to print response that the server will send to the client.
   protected void showResponse(String res) {
-    System.out.println("RES to send: " + res);
+    System.out.println(getTimestamp() + " RES to send: " + res);
   }
 
   // Helper method to print any errors that happen while the server is running.
   protected void showError(String msg) {
-    System.out.println("ERROR: " + msg);
+    System.out.println(getTimestamp() + " ERROR: " + msg);
   }
 
   // Helper method to print any info to be read by the user
@@ -150,9 +156,7 @@ abstract class AbstractServer implements Server {
   protected String prepareDataToSend(String[] req) throws IOException {
     String res = handleRequest(req);
     if (!reqStatus) {
-      long timestamp = System.currentTimeMillis();
-      String msg = "timestamp=" + timestamp + ". " + res;
-      showError(msg);
+      showError(res);
     } else {
       showResponse(res);
     }
@@ -160,8 +164,7 @@ abstract class AbstractServer implements Server {
   }
 
   protected void handleInvalidRequest(ValidationCode validationCode) {
-    long timestamp = System.currentTimeMillis();
-    String res = "timestamp=" + timestamp + ". Malformed request, ";
+    String res = "Malformed request, ";
     if (validationCode == ValidationCode.INCORRECT_PARAMETER_COUNT) {
       res += "incorrect parameter count";
     } else {
@@ -223,7 +226,7 @@ abstract class AbstractServer implements Server {
       Server server = getServerInstance(port);
       server.start();
     } catch (IOException | IllegalArgumentException e) {
-      System.out.println("ERROR: " + e.getMessage());
+      System.out.println(getTimestamp() + "ERROR: " + e.getMessage());
     }
   }
 }

@@ -2,6 +2,7 @@ package clients;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.sql.Timestamp;
 import java.util.Scanner;
 
 abstract class AbstractClient implements Client {
@@ -17,14 +18,19 @@ abstract class AbstractClient implements Client {
     sc = new Scanner(System.in);
   }
 
+  private String getTimestamp() {
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    return "[" + timestamp + "]";
+  }
+
   // Helper method to print response that the client receives from the server.
   protected void showResponse(String res) {
-    System.out.println("RES received: " + res);
+    System.out.println(getTimestamp() + " RES received: " + res);
   }
 
   // Helper method to print any errors during program execution.
   protected void showError(String msg) {
-    System.out.println("ERROR: " + msg);
+    System.out.println(getTimestamp() + " ERROR: " + msg);
   }
 
   // Helper method to print any info to be read by the user
@@ -47,7 +53,7 @@ abstract class AbstractClient implements Client {
       Client client = getClientInstance(name, port, timeout);
       client.start();
     } catch (IOException | IllegalArgumentException e) {
-      System.out.println("ERROR: " + e.getMessage());
+      System.out.println(getTimestamp() + "ERROR: " + e.getMessage());
     }
   }
 
@@ -66,7 +72,7 @@ abstract class AbstractClient implements Client {
                     "Requests are tab separated. eg : PUT \\t This is the key \\t This is the value\n");
 
     while (true) {
-      showInfo("\nREQ to send: ");
+      showInfo("REQ to send: ");
       String request = sc.nextLine();
       try {
         handleRequestsAndResponses(request);
