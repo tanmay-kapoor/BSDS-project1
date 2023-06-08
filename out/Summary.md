@@ -1,4 +1,13 @@
-# Summary of learnings
+# Assignment Overview
+
+Overall, this project provided me with hands-on experience in network programming,
+understanding network protocols, implementing error handling mechanisms, and developing reliable
+client-server applications. It enhanced my knowledge of networking concepts in Java, and gave
+me a deeper understanding of how communication takes place over TCP and UDP protocols.
+
+# Technical Impression
+
+Belo are some of the key learnings I gained from this project.
 
 ### Socket Programming
 
