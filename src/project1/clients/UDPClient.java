@@ -27,7 +27,6 @@ public class UDPClient extends AbstractClient {
    * @param timeout time limit in milli-sec to wait before saying socket is not receiving back a response.
    */
   public UDPClient(String name, int port, int timeout) throws IOException {
-    super();
     this.port = port;
     this.clientSocket = new DatagramSocket();
     clientSocket.setSoTimeout(timeout);

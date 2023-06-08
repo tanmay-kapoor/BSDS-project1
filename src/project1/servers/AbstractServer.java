@@ -5,18 +5,26 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
 abstract class AbstractServer implements Server {
+  private String path;
   protected final String fileName;
   protected final Map<String, String> map;
   protected boolean reqStatus;
+  protected abstract String getIp();
+  protected abstract String getPort();
 
   protected abstract String receiveDataFromClient() throws IOException;
 
@@ -32,12 +40,21 @@ abstract class AbstractServer implements Server {
     this.fileName = "contents.json";
     this.map = new HashMap<>();
     this.reqStatus = false;
+    try {
+      File f = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+      this.path = f.getParent() + "/";
+      System.out.println(this.path);
+    } catch (URISyntaxException e) {
+      showError(e.getMessage());
+    }
   }
 
   @Override
   public void readFromFile() {
     try {
-      FileReader reader = new FileReader(fileName);
+      InputStream is = new FileInputStream(path + fileName);
+      Reader reader = new InputStreamReader(is);
+
       JSONParser jsonParser = new JSONParser();
       JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
       JSONArray data = (JSONArray) jsonObject.get("data");
@@ -122,9 +139,9 @@ abstract class AbstractServer implements Server {
     }
     jsonObject.put("data", data);
 
-    FileWriter file = new FileWriter(fileName);
-    file.write(jsonObject.toJSONString());
-    file.close();
+    FileWriter writer = new FileWriter(path + fileName);
+    writer.write(jsonObject.toJSONString());
+    writer.close();
   }
 
   @Override
@@ -139,7 +156,7 @@ abstract class AbstractServer implements Server {
 
   @Override
   public void showRequest(String req) {
-    System.out.println(getTimestamp() + " REQ to process: " + req);
+    System.out.println(getTimestamp() + " REQ from " + getIp() + ":" + getPort() + " : " + req);
   }
 
   @Override

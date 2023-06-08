@@ -23,10 +23,9 @@ public class TCPClient extends AbstractClient {
    * @param timeout time limit in milli-sec to wait before saying socket is not receiving back a response.
    */
   public TCPClient(String name, int port, int timeout) throws IOException {
-    super();
     InetAddress ip = InetAddress.getByName(name);
     this.clientSocket = new Socket(ip, port);
-    showInfo("project1.clients.Connection established\n\n");
+    showInfo("Connection established\n\n");
     clientSocket.setSoTimeout(timeout);
 
     din = new DataInputStream(clientSocket.getInputStream());

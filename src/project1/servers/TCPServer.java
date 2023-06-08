@@ -30,12 +30,11 @@ public class TCPServer extends AbstractServer {
    * @throws IOException in case of errors which creating the socket.
    */
   public TCPServer(int port) throws IOException {
-    super();
     serverSocket = new ServerSocket(port);
     socket = serverSocket.accept();
     din = new DataInputStream(socket.getInputStream());
     dout = new DataOutputStream(socket.getOutputStream());
-    showInfo("project1.clients.Connection established\n\n");
+    showInfo("Connection established\n\n");
   }
 
   private TCPServer() {
@@ -43,8 +42,18 @@ public class TCPServer extends AbstractServer {
 
   @Override
   protected boolean handleServeRequestError(Exception e) {
-    showError("project1.clients.Connection lost");
+    showError("Connection lost");
     return true;
+  }
+
+  @Override
+  protected String getIp() {
+    return String.valueOf(socket.getInetAddress());
+  }
+
+  @Override
+  protected String getPort() {
+    return Integer.toString(socket.getPort());
   }
 
   @Override
