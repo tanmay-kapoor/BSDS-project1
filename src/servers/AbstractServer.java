@@ -153,24 +153,14 @@ abstract class AbstractServer implements Server {
     System.out.print(msg);
   }
 
-  protected String prepareDataToSend(String[] req) throws IOException {
-    String res = handleRequest(req);
-    if (!reqStatus) {
-      showError(res);
-    } else {
-      showResponse(res);
-    }
-    return res;
-  }
-
-  protected void handleInvalidRequest(ValidationCode validationCode) {
+  protected String handleInvalidRequest(ValidationCode validationCode) {
     String res = "Malformed request, ";
     if (validationCode == ValidationCode.INCORRECT_PARAMETER_COUNT) {
       res += "incorrect parameter count";
     } else {
       res += "invalid request type. Must be GET, PUT, DELETE or STOP only.";
     }
-    showResponse(res);
+    return res;
   }
 
   /**
@@ -192,12 +182,19 @@ abstract class AbstractServer implements Server {
         String[] req = request.split("\\t+");
 
         ValidationCode validationCode = isValidRequest(req);
+        String res;
         if (validationCode == ValidationCode.VALID_REQUEST_TYPE) {
-          String res = prepareDataToSend(req);
-          sendDataToClient(res);
+          res = handleRequest(req);
+          if (!reqStatus) {
+            showError(res);
+          } else {
+            showResponse(res);
+          }
         } else {
-          handleInvalidRequest(validationCode);
+          res = handleInvalidRequest(validationCode);
+          showResponse(res);
         }
+        sendDataToClient(res);
       } catch (IOException e) {
         boolean shouldBreak = handleServeRequestError(e);
         if (shouldBreak)
