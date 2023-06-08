@@ -57,7 +57,13 @@ abstract class AbstractClient implements Client {
   // intervention.
   @Override
   public void start() {
-    showInfo("All valid request formats:\n\n1. GET x\n2. PUT x y\n3. DELETE x\nType stop to exit\n");
+    showInfo(
+            "All valid request formats:\n\n" +
+                    "GET x\n" +
+                    "PUT x y\n" +
+                    "DELETE x\n" +
+                    "STOP\n\n" +
+                    "Requests are tab separated. eg : PUT \\t This is the key \\t This is the value\n");
 
     while (true) {
       showInfo("\nREQ to send: ");
